@@ -1,9 +1,9 @@
 // -*- C++ -*-
 //
-// Package:    AdvancedMultifitCMSSW/TreeProducer
+// Package:    EcalZee
 // Class:      TreeProducer
 // 
-/**\class TreeProducer TreeProducer.cc AdvancedMultifitCMSSW/TreeProducer/plugins/TreeProducer.cc
+/**\class TreeProducer TreeProducer.cc EcalZee/plugins/TreeProducer.cc
 
  Description: [one line class summary]
 
