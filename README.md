@@ -2,6 +2,7 @@
 
 Where:
 
+    /afs/cern.ch/user/a/amassiro/work/ECAL/CMSSW_9_2_13/src/ECALValidation/EcalZee
     /afs/cern.ch/user/a/amassiro/work/ECAL/CMSSW_9_3_0_pre4/src/ECALValidation/EcalZee
     
 To install:
