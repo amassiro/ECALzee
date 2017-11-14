@@ -136,14 +136,35 @@ class TreeProducer : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
 
       // ----------member data ---------------------------
 
+      edm::InputTag _vtxTag;
+      edm::InputTag _EleTag;
+      edm::InputTag _Supercluster_EB_Tag;
+      edm::InputTag _Supercluster_EE_Tag;
       
-      TTree *outTree;
+      edm::EDGetTokenT<reco::VertexCollection> _Token_vtxTag;
+      edm::EDGetTokenT<std::vector<pat::Electron> > _Token_EleTag;
+      edm::EDGetTokenT<reco::SuperClusterCollection> _Token_Supercluster_EB_Tag;
+      edm::EDGetTokenT<reco::SuperClusterCollection> _Token_Supercluster_EE_Tag;
+      
+      
+      
+      TTree *_outTree;
       
       UInt_t _run;
       UShort_t _lumi;
       UShort_t _bx;
       UShort_t _event;      
    
+      std::vector<float> _std_vector_SC_EB_raw_et;
+      std::vector<float> _std_vector_SC_EB_et;
+      std::vector<float> _std_vector_SC_EB_eta;
+      std::vector<float> _std_vector_SC_EB_phi;
+
+      std::vector<float> _std_vector_SC_EE_raw_et;
+      std::vector<float> _std_vector_SC_EE_et;
+      std::vector<float> _std_vector_SC_EE_eta;
+      std::vector<float> _std_vector_SC_EE_phi;
+      
       
 };
 
@@ -161,6 +182,19 @@ class TreeProducer : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
 TreeProducer::TreeProducer(const edm::ParameterSet& iConfig)
 
 {
+  
+  _vtxTag = iConfig.getParameter<edm::InputTag>("vtxTag");
+  _EleTag = iConfig.getParameter<edm::InputTag>("EleTag"); 
+  _Supercluster_EB_Tag = iConfig.getParameter<edm::InputTag>("SuperClusterEBTag"); 
+  _Supercluster_EE_Tag = iConfig.getParameter<edm::InputTag>("SuperClusterEETag"); 
+  
+  
+  _Token_vtxTag   = consumes<reco::VertexCollection>(_vtxTag);
+  _Token_EleTag   = consumes<std::vector<pat::Electron> >(_EleTag);
+  _Token_Supercluster_EB_Tag = consumes<reco::SuperClusterCollection> (_Supercluster_EB_Tag);
+  _Token_Supercluster_EE_Tag = consumes<reco::SuperClusterCollection> (_Supercluster_EE_Tag);
+  
+ 
    //now do what ever initialization is needed
    usesResource("TFileService");
    
@@ -169,13 +203,24 @@ TreeProducer::TreeProducer(const edm::ParameterSet& iConfig)
    usesResource("TFileService");
    edm::Service<TFileService> fs;
    
-   outTree = fs->make<TTree>("tree","tree");
+   _outTree = fs->make<TTree>("tree","tree");
    
-   outTree->Branch("run",               &_run,             "run/i");
-   outTree->Branch("lumi",              &_lumi,            "lumi/s");
-   outTree->Branch("bx",                &_bx,              "bx/s");
-   outTree->Branch("event",             &_event,           "event/i");
-      
+   _outTree->Branch("run",               &_run,             "run/i");
+   _outTree->Branch("lumi",              &_lumi,            "lumi/s");
+   _outTree->Branch("bx",                &_bx,              "bx/s");
+   _outTree->Branch("event",             &_event,           "event/i");
+ 
+   _outTree -> Branch("std_vector_SC_EB_raw_et"  , "std::vector<float>",   &_std_vector_SC_EB_raw_et);
+   _outTree -> Branch("std_vector_SC_EB_et"      , "std::vector<float>",   &_std_vector_SC_EB_et);
+   _outTree -> Branch("std_vector_SC_EB_eta"     , "std::vector<float>",   &_std_vector_SC_EB_eta);
+   _outTree -> Branch("std_vector_SC_EB_phi"     , "std::vector<float>",   &_std_vector_SC_EB_phi);
+
+   _outTree -> Branch("std_vector_SC_EE_raw_et"  , "std::vector<float>",   &_std_vector_SC_EE_raw_et);
+   _outTree -> Branch("std_vector_SC_EE_et"      , "std::vector<float>",   &_std_vector_SC_EE_et);
+   _outTree -> Branch("std_vector_SC_EE_eta"     , "std::vector<float>",   &_std_vector_SC_EE_eta);
+   _outTree -> Branch("std_vector_SC_EE_phi"     , "std::vector<float>",   &_std_vector_SC_EE_phi);
+   
+   
 }
 
 
@@ -201,7 +246,91 @@ TreeProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
   _bx = iEvent.eventAuxiliary().bunchCrossing();
   _event = iEvent.eventAuxiliary().event();
   
-  outTree->Fill();
+  
+  
+  ///---- Vertexes
+  edm::Handle<reco::VertexCollection> vtxH;
+  iEvent.getByToken(_Token_vtxTag,vtxH);
+  
+  
+  //---- Electrons
+  edm::Handle<std::vector <pat::Electron> > electronHandle;
+  iEvent.getByToken(_Token_EleTag,electronHandle);
+  
+  
+  
+  
+  _std_vector_SC_EB_raw_et.clear();
+  _std_vector_SC_EB_et.clear();
+  _std_vector_SC_EB_eta.clear();
+  _std_vector_SC_EB_phi.clear();
+
+  _std_vector_SC_EE_raw_et.clear();
+  _std_vector_SC_EE_et.clear();
+  _std_vector_SC_EE_eta.clear();
+  _std_vector_SC_EE_phi.clear();
+  
+  
+  // Super Clusters
+  // ... barrel
+  edm::Handle<reco::SuperClusterCollection> superClusters_EB_Handle;
+  iEvent.getByToken( _Token_Supercluster_EB_Tag, superClusters_EB_Handle );
+  const reco::SuperClusterCollection* theBarrelSuperClusters = superClusters_EB_Handle.product () ;
+  if ( ! superClusters_EB_Handle.isValid() ) {
+    std::cerr << "EcalValidation::analyze --> superClusters_EB_Handle not found" << std::endl; 
+  }
+  else {
+       
+      for (reco::SuperClusterCollection::const_iterator itSC = theBarrelSuperClusters->begin(); itSC != theBarrelSuperClusters->end(); ++itSC ) {
+        double scEt = itSC -> energy() * sin(2.*atan( exp(- itSC->position().eta() )));
+        double scRawEt = itSC -> rawEnergy() * sin(2.*atan( exp(- itSC->position().eta() )));
+        
+        _std_vector_SC_EB_raw_et.push_back(scRawEt);
+        _std_vector_SC_EB_et.push_back(scEt);
+        _std_vector_SC_EB_eta.push_back(itSC->position().eta());
+        _std_vector_SC_EB_phi.push_back(itSC->position().phi());
+      }
+        
+  }
+  
+
+  // ... endcap
+  edm::Handle<reco::SuperClusterCollection> superClusters_EE_Handle;
+  iEvent.getByToken( _Token_Supercluster_EE_Tag, superClusters_EE_Handle );
+  const reco::SuperClusterCollection* theEndcapSuperClusters = superClusters_EE_Handle.product () ;
+  if ( ! superClusters_EE_Handle.isValid() ) {
+    std::cerr << "EcalValidation::analyze --> superClusters_EE_Handle not found" << std::endl; 
+  }
+  else {
+    
+    for (reco::SuperClusterCollection::const_iterator itSC = theEndcapSuperClusters->begin(); itSC != theEndcapSuperClusters->end(); ++itSC ) {
+      double scEt = itSC -> energy() * sin(2.*atan( exp(- itSC->position().eta() )));
+      double scRawEt = itSC -> rawEnergy() * sin(2.*atan( exp(- itSC->position().eta() )));
+      
+      _std_vector_SC_EE_raw_et.push_back(scRawEt);
+      _std_vector_SC_EE_et.push_back(scEt);
+      _std_vector_SC_EE_eta.push_back(itSC->position().eta());
+      _std_vector_SC_EE_phi.push_back(itSC->position().phi());
+    }
+    
+  }
+  
+  
+//   int nSCcleaned = 0;
+//   int nSC = 0;
+//   
+//   for (reco::SuperClusterCollection::const_iterator itSC = theBarrelSuperClusters->begin(); 
+//        itSC != theBarrelSuperClusters->end(); ++itSC ) {
+//     
+//     double scEt = itSC -> energy() * sin(2.*atan( exp(- itSC->position().eta() )));
+//   double scRawEt = itSC -> rawEnergy() * sin(2.*atan( exp(- itSC->position().eta() )));
+  
+  
+  
+  
+  
+  
+  _outTree->Fill();
   
    
 }
