@@ -35,7 +35,7 @@ process.TFileService = cms.Service("TFileService",
 )
 
 process.options = cms.untracked.PSet(
-#    SkipEvent = cms.untracked.vstring('ProductNotFound'),
+   SkipEvent = cms.untracked.vstring('ProductNotFound'),
 )
 
 # Production Info
