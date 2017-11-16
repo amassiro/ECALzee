@@ -15,8 +15,11 @@ process.load('FWCore.MessageService.MessageLogger_cfi')
 process.load('Configuration.EventContent.EventContent_cff')
 process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
 process.load('Configuration.StandardSequences.MagneticField_AutoFromDBCurrent_cff')
+process.load('Configuration.StandardSequences.RawToDigi_Data_cff')
+process.load('Configuration.StandardSequences.Reconstruction_Data_cff')
 process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
+
 
 process.maxEvents = cms.untracked.PSet(
     input = cms.untracked.int32(options.maxEvents)
@@ -41,8 +44,49 @@ process.configurationMetadata = cms.untracked.PSet(
 
 # Other statements
 from Configuration.AlCa.GlobalTag import GlobalTag
-#process.GlobalTag = GlobalTag(process.GlobalTag, '92X_dataRun2_Prompt_v8', '')
-process.GlobalTag = GlobalTag(process.GlobalTag, '90X_upgrade2017_realistic_v20', '')
+process.GlobalTag = GlobalTag(process.GlobalTag, '92X_dataRun2_2017Repro_Candidate_2017_11_10_15_04_54', '')
+
+
+
+
+#--------------------------
+# Define PAT sequence
+#--------------------------
+
+# Standard PAT Configuration File
+process.load("PhysicsTools.PatAlgos.patSequences_cff")
+process.patElectrons.addElectronID = cms.bool(False)
+
+# ---- remove MC references ----
+
+from PhysicsTools.PatAlgos.tools.coreTools import removeMCMatching
+removeMCMatching(process, ['All'], outputModules=[], postfix="")
+#removeMCMatching(process, ['All'])
+process.cleanPatTaus.preselection = cms.string('tauID("decayModeFinding") > 0.5 & tauID("byLooseCombinedIsolationDeltaBetaCorr3Hits") > 0.5 & tauID("againstMuonTight3") > 0.5 ')
+
+
+process.patMETs.addGenMET = cms.bool(False)
+
+process.options.allowUnscheduled = cms.untracked.bool(True)
+
+
+
+#--------------------------
+# Define RECO sequence
+#--------------------------
+
+# Path and EndPath definitions
+process.raw2digi_step = cms.Path(process.RawToDigi)
+process.reconstruction_step = cms.Path(process.reconstruction)
+process.endjob_step = cms.EndPath(process.endOfProcess)
+#process.RECOSIMoutput_step = cms.EndPath(process.RECOSIMoutput)
+
+
+
+
+#--------------------------
+# Tree producer
+#--------------------------
 
 
 process.TreeProducer = cms.EDAnalyzer('TreeProducer',
@@ -66,13 +110,17 @@ process.source = cms.Source("PoolSource",
 
 
 process.TreeProducer_step = cms.Path(process.TreeProducer)
-process.endjob_step = cms.EndPath(process.endOfProcess)
 
 
-process.schedule = cms.Schedule(
-                                process.TreeProducer_step, 
-                                process.endjob_step
-                                )
+#
+# Schedule definition
+#
+process.schedule = cms.Schedule(process.raw2digi_step,process.reconstruction_step,process.endjob_step,process.TreeProducer_step)
+#process.schedule = cms.Schedule(process.pEcalAlignment)
+from PhysicsTools.PatAlgos.tools.helpers import associatePatAlgosToolsTask
+associatePatAlgosToolsTask(process)
 
-
+#Setup FWK for multithreaded
+process.options.numberOfThreads=cms.untracked.uint32(4)
+process.options.numberOfStreams=cms.untracked.uint32(0)
 

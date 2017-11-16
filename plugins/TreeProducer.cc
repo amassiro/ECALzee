@@ -143,6 +143,7 @@ class TreeProducer : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
       
       edm::EDGetTokenT<reco::VertexCollection> _Token_vtxTag;
       edm::EDGetTokenT<std::vector<pat::Electron> > _Token_EleTag;
+//       edm::EDGetTokenT<std::vector<reco::PFCandidate> > _Token_EleTag;
       edm::EDGetTokenT<reco::SuperClusterCollection> _Token_Supercluster_EB_Tag;
       edm::EDGetTokenT<reco::SuperClusterCollection> _Token_Supercluster_EE_Tag;
       
@@ -165,6 +166,7 @@ class TreeProducer : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
       std::vector<float> _std_vector_SC_EE_eta;
       std::vector<float> _std_vector_SC_EE_phi;
       
+      float _mll;
       
 };
 
@@ -191,6 +193,7 @@ TreeProducer::TreeProducer(const edm::ParameterSet& iConfig)
   
   _Token_vtxTag   = consumes<reco::VertexCollection>(_vtxTag);
   _Token_EleTag   = consumes<std::vector<pat::Electron> >(_EleTag);
+//   _Token_EleTag   = consumes<std::vector<reco::PFCandidate> >(_EleTag);
   _Token_Supercluster_EB_Tag = consumes<reco::SuperClusterCollection> (_Supercluster_EB_Tag);
   _Token_Supercluster_EE_Tag = consumes<reco::SuperClusterCollection> (_Supercluster_EE_Tag);
   
@@ -219,6 +222,8 @@ TreeProducer::TreeProducer(const edm::ParameterSet& iConfig)
    _outTree -> Branch("std_vector_SC_EE_et"      , "std::vector<float>",   &_std_vector_SC_EE_et);
    _outTree -> Branch("std_vector_SC_EE_eta"     , "std::vector<float>",   &_std_vector_SC_EE_eta);
    _outTree -> Branch("std_vector_SC_EE_phi"     , "std::vector<float>",   &_std_vector_SC_EE_phi);
+   
+   _outTree -> Branch("mll",&_mll,"mll/F");
    
    
 }
@@ -255,8 +260,24 @@ TreeProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
   
   //---- Electrons
   edm::Handle<std::vector <pat::Electron> > electronHandle;
+//   edm::Handle<std::vector <reco::PFCandidate> > electronHandle;
   iEvent.getByToken(_Token_EleTag,electronHandle);
   
+  std::vector<pat::Electron> electrons = *electronHandle;
+//   std::vector<reco::PFCandidate> electrons = *electronHandle;
+  
+  //---- the first two are used to build mll
+  _mll = -999;
+  reco::Candidate::LorentzVector L1;
+  for ( unsigned int i=0; i<electrons.size(); ++i ){
+    pat::Electron electron = electrons.at(i);
+//     reco::PFCandidate electron = electrons.at(i);
+    L1 = electron.p4();
+    break;    
+  }
+  
+  
+  reco::Candidate::LorentzVector L2;
   
   
   
@@ -311,6 +332,19 @@ TreeProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
       _std_vector_SC_EE_et.push_back(scEt);
       _std_vector_SC_EE_eta.push_back(itSC->position().eta());
       _std_vector_SC_EE_phi.push_back(itSC->position().phi());
+      
+      
+      if (_mll != -999 && fabs(itSC->position().eta()) > 2.5) {
+        reco::Candidate::LorentzVector L2;
+        L2.SetE(itSC -> energy());
+        L2.SetPx(scEt * cos (itSC->position().phi()));
+        L2.SetPy(scEt * sin (itSC->position().phi()));
+        L2.SetPz(itSC -> energy() * cos (  2.*atan( exp(- itSC->position().eta() ))   ));
+        _mll = (L1+L2).mass();
+      }
+      
+      
+      
     }
     
   }

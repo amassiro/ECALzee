@@ -5,6 +5,10 @@ Run
     cmsRun dumpMC.py  inputFiles=file:/tmp/amassiro/BEF26E0E-C8C5-E711-8877-0025905B85FC.root   outputFile=test.root
     
     
+    /DoubleEG/Run2017C-ZElectron-PromptReco-v1/RAW-RECO
+    cmsRun dumpDATA.py  inputFiles=file:/eos/cms/store/data/Run2017C/DoubleEG/RAW-RECO/ZElectron-PromptReco-v1/000/299/368/00000/1E1F5306-7C6D-E711-A4F7-02163E01A1D9.root  outputFile=test.root
+    cmsRun dumpDATA.py  inputFiles=file:/tmp/amassiro/1E1F5306-7C6D-E711-A4F7-02163E01A1D9.root   outputFile=test.data.root
+    
     
 
     
