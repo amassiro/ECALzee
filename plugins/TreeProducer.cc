@@ -334,13 +334,14 @@ TreeProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
       _std_vector_SC_EE_phi.push_back(itSC->position().phi());
       
       
-      if (_mll != -999 && fabs(itSC->position().eta()) > 2.5) {
+      if (_mll == -999 && fabs(itSC->position().eta()) > 2.5) {
         reco::Candidate::LorentzVector L2;
         L2.SetE(itSC -> energy());
         L2.SetPx(scEt * cos (itSC->position().phi()));
         L2.SetPy(scEt * sin (itSC->position().phi()));
         L2.SetPz(itSC -> energy() * cos (  2.*atan( exp(- itSC->position().eta() ))   ));
         _mll = (L1+L2).mass();
+        if (_mll < 10) _mll = -999;
       }
       
       
