@@ -24,8 +24,11 @@ Plot
 
 
     tree = (TTree*) _file0->Get("TreeProducer/tree")
-    tree->Draw("mll")
     tree->Draw("mll", "mll>10")
+    tree->Draw("@std_vector_Ele_pt.size()", "")
     
+    
+    tree->Draw("std_vector_Ele_pt.at(0)", "")
+
     
  

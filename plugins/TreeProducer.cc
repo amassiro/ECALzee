@@ -156,6 +156,11 @@ class TreeProducer : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
       UShort_t _bx;
       UShort_t _event;      
    
+
+      std::vector<float> _std_vector_Ele_pt;
+      std::vector<float> _std_vector_Ele_eta;
+      std::vector<float> _std_vector_Ele_phi;
+      
       std::vector<float> _std_vector_SC_EB_raw_et;
       std::vector<float> _std_vector_SC_EB_et;
       std::vector<float> _std_vector_SC_EB_eta;
@@ -213,6 +218,12 @@ TreeProducer::TreeProducer(const edm::ParameterSet& iConfig)
    _outTree->Branch("bx",                &_bx,              "bx/s");
    _outTree->Branch("event",             &_event,           "event/i");
  
+   
+   _outTree -> Branch("std_vector_Ele_pt"      , "std::vector<float>",   &_std_vector_Ele_pt);
+   _outTree -> Branch("std_vector_Ele_eta"     , "std::vector<float>",   &_std_vector_Ele_eta);
+   _outTree -> Branch("std_vector_Ele_phi"     , "std::vector<float>",   &_std_vector_Ele_phi);
+   
+   
    _outTree -> Branch("std_vector_SC_EB_raw_et"  , "std::vector<float>",   &_std_vector_SC_EB_raw_et);
    _outTree -> Branch("std_vector_SC_EB_et"      , "std::vector<float>",   &_std_vector_SC_EB_et);
    _outTree -> Branch("std_vector_SC_EB_eta"     , "std::vector<float>",   &_std_vector_SC_EB_eta);
@@ -266,19 +277,32 @@ TreeProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
   std::vector<pat::Electron> electrons = *electronHandle;
 //   std::vector<reco::PFCandidate> electrons = *electronHandle;
   
+  _std_vector_Ele_pt.clear();
+  _std_vector_Ele_eta.clear();
+  _std_vector_Ele_phi.clear();
+  
   //---- the first two are used to build mll
   _mll = -999;
+  bool notfound = true;
   reco::Candidate::LorentzVector L1;
   for ( unsigned int i=0; i<electrons.size(); ++i ){
     pat::Electron electron = electrons.at(i);
 //     reco::PFCandidate electron = electrons.at(i);
-    L1 = electron.p4();
-    break;    
+    
+    _std_vector_Ele_pt.push_back(electron.pt());
+    _std_vector_Ele_eta.push_back(electron.eta());
+    _std_vector_Ele_phi.push_back(electron.phi());
+    
+    
+    if (fabs(electron.eta()) < 1.5 && notfound) {
+      L1 = electron.p4();
+      notfound = false;
+//       break;
+    }    
   }
   
   
   reco::Candidate::LorentzVector L2;
-  
   
   
   _std_vector_SC_EB_raw_et.clear();
