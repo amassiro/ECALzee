@@ -10,7 +10,13 @@ Run
     cmsRun dumpDATA.py  inputFiles=file:/tmp/amassiro/1E1F5306-7C6D-E711-A4F7-02163E01A1D9.root   outputFile=test.data.root  maxEvents=-1
     
     
+    cp /eos/cms/store/data/Run2017C/DoubleEG/RAW-RECO/ZElectron-PromptReco-v1/000/299/368/00000/566CA2BF-8E6D-E711-A37F-02163E012531.root    /tmp/amassiro/
+    cmsRun dumpDATA.py  inputFiles=file:/tmp/amassiro/566CA2BF-8E6D-E711-A37F-02163E012531.root   outputFile=test.data.2.root  maxEvents=-1
 
+    cp /eos/cms/store/data/Run2017C/DoubleEG/RAW-RECO/ZElectron-PromptReco-v1/000/299/368/00000/64C2C610-926D-E711-A8E6-02163E0128FE.root     /tmp/amassiro/
+    cmsRun dumpDATA.py  inputFiles=file:/tmp/amassiro/64C2C610-926D-E711-A8E6-02163E0128FE.root   outputFile=test.data.3.root  maxEvents=-1
+
+    
     
 
 Plot
@@ -19,6 +25,7 @@ Plot
 
     tree = (TTree*) _file0->Get("TreeProducer/tree")
     tree->Draw("mll")
+    tree->Draw("mll", "mll>10")
     
     
  
