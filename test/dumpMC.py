@@ -46,7 +46,8 @@ process.GlobalTag = GlobalTag(process.GlobalTag, '90X_upgrade2017_realistic_v20'
 
 
 process.TreeProducer = cms.EDAnalyzer('TreeProducer',
-                            EleTag    = cms.InputTag("electrons"),
+                            EleTag    = cms.InputTag("slimmedElectrons"),                                      
+                            #EleTag    = cms.InputTag("electrons"),
                             vtxTag    = cms.InputTag("offlinePrimaryVertices"),
                             SuperClusterEBTag    = cms.InputTag("particleFlowSuperClusterECAL:particleFlowSuperClusterECALBarrel"),
                             SuperClusterEETag    = cms.InputTag("particleFlowSuperClusterECAL:particleFlowSuperClusterECALEndcapWithPreshower"),
@@ -55,6 +56,7 @@ process.TreeProducer = cms.EDAnalyzer('TreeProducer',
 #vector<reco::SuperCluster>            "particleFlowSuperClusterECAL"   "particleFlowSuperClusterECALBarrel"   "RECO"    
 #vector<reco::SuperCluster>            "particleFlowSuperClusterECAL"   "particleFlowSuperClusterECALEndcapWithPreshower"   "RECO"    
 
+#vector<reco::SuperCluster>            "reducedEgamma"             "reducedSuperClusters"   "PAT"        
 
 
 process.MessageLogger.cerr.FwkReport.reportEvery = cms.untracked.int32(50)
