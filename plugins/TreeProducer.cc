@@ -160,6 +160,10 @@ class TreeProducer : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
       std::vector<float> _std_vector_Ele_pt;
       std::vector<float> _std_vector_Ele_eta;
       std::vector<float> _std_vector_Ele_phi;
+      std::vector<float> _std_vector_Ele_r9;
+      std::vector<float> _std_vector_Ele_sigmaIetaIeta;
+      std::vector<float> _std_vector_Ele_sigmaIphiIphi;
+      std::vector<float> _std_vector_Ele_dr03EcalRecHitSumEt;
       
       std::vector<float> _std_vector_SC_EB_raw_et;
       std::vector<float> _std_vector_SC_EB_et;
@@ -222,7 +226,10 @@ TreeProducer::TreeProducer(const edm::ParameterSet& iConfig)
    _outTree -> Branch("std_vector_Ele_pt"      , "std::vector<float>",   &_std_vector_Ele_pt);
    _outTree -> Branch("std_vector_Ele_eta"     , "std::vector<float>",   &_std_vector_Ele_eta);
    _outTree -> Branch("std_vector_Ele_phi"     , "std::vector<float>",   &_std_vector_Ele_phi);
-   
+   _outTree -> Branch("std_vector_Ele_r9"                      , "std::vector<float>",   &_std_vector_Ele_r9);
+   _outTree -> Branch("std_vector_Ele_sigmaIetaIeta"           , "std::vector<float>",   &_std_vector_Ele_sigmaIetaIeta);
+   _outTree -> Branch("std_vector_Ele_sigmaIphiIphi"           , "std::vector<float>",   &_std_vector_Ele_sigmaIphiIphi);
+   _outTree -> Branch("std_vector_Ele_dr03EcalRecHitSumEt"     , "std::vector<float>",   &_std_vector_Ele_dr03EcalRecHitSumEt);
    
    _outTree -> Branch("std_vector_SC_EB_raw_et"  , "std::vector<float>",   &_std_vector_SC_EB_raw_et);
    _outTree -> Branch("std_vector_SC_EB_et"      , "std::vector<float>",   &_std_vector_SC_EB_et);
@@ -280,6 +287,13 @@ TreeProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
   _std_vector_Ele_pt.clear();
   _std_vector_Ele_eta.clear();
   _std_vector_Ele_phi.clear();
+  _std_vector_Ele_r9                  .clear();
+  _std_vector_Ele_sigmaIetaIeta       .clear();
+  _std_vector_Ele_sigmaIphiIphi       .clear();
+  _std_vector_Ele_dr03EcalRecHitSumEt .clear();
+  
+  
+  
   
   //---- the first two are used to build mll
   _mll = -999;
@@ -292,6 +306,10 @@ TreeProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
     _std_vector_Ele_pt.push_back(electron.pt());
     _std_vector_Ele_eta.push_back(electron.eta());
     _std_vector_Ele_phi.push_back(electron.phi());
+    _std_vector_Ele_r9                 .push_back(electron.r9                 ());
+    _std_vector_Ele_sigmaIetaIeta      .push_back(electron.sigmaIetaIeta      ());
+    _std_vector_Ele_sigmaIphiIphi      .push_back(electron.sigmaIphiIphi      ());
+    _std_vector_Ele_dr03EcalRecHitSumEt.push_back(electron.dr03EcalRecHitSumEt());
     
     
     if (fabs(electron.eta()) < 1.5 && notfound) {
