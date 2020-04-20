@@ -49,8 +49,12 @@ process.TreeProducer = cms.EDAnalyzer('TreeProducer',
                             EleTag    = cms.InputTag("slimmedElectrons"),                                      
                             #EleTag    = cms.InputTag("electrons"),
                             vtxTag    = cms.InputTag("offlinePrimaryVertices"),
-                            SuperClusterEBTag    = cms.InputTag("particleFlowSuperClusterECAL:particleFlowSuperClusterECALBarrel"),
-                            SuperClusterEETag    = cms.InputTag("particleFlowSuperClusterECAL:particleFlowSuperClusterECALEndcapWithPreshower"),
+                            #SuperClusterEBTag    = cms.InputTag("particleFlowSuperClusterECAL:particleFlowSuperClusterECALBarrel"),
+                            #SuperClusterEETag    = cms.InputTag("particleFlowSuperClusterECAL:particleFlowSuperClusterECALEndcapWithPreshower"),
+
+                            SuperClusterEBTag    = cms.InputTag("reducedEgamma:reducedSuperClusters"),
+                            SuperClusterEETag    = cms.InputTag("reducedEgamma:reducedSuperClusters"),
+
                            )
 
 #vector<reco::SuperCluster>            "particleFlowSuperClusterECAL"   "particleFlowSuperClusterECALBarrel"   "RECO"    
